@@ -426,6 +426,44 @@ body {
   text-decoration:none;
 }
 .btn-flor:hover { transform:translateY(-3px); box-shadow:0 10px 32px rgba(201,168,76,.6); }
+
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 600px) {
+  .titulo-linea1 { font-size: 2rem; }
+  .titulo-linea2 { font-size: 0.8rem; letter-spacing: 2px; }
+  .floral-sep { font-size: 1rem; letter-spacing: 5px; }
+
+  .envelope { width: 220px; height: 148px; }
+  .env-flap {
+    border-left: 110px solid transparent;
+    border-right: 110px solid transparent;
+    border-top: 76px solid #b8892d;
+  }
+  .env-left {
+    border-left: 110px solid #c09438;
+    border-top: 74px solid transparent;
+    border-bottom: 74px solid transparent;
+  }
+  .env-right {
+    border-right: 110px solid #c09438;
+    border-top: 74px solid transparent;
+    border-bottom: 74px solid transparent;
+  }
+  .env-bottom {
+    border-left: 110px solid transparent;
+    border-right: 110px solid transparent;
+    border-bottom: 76px solid #bf9235;
+  }
+
+  .carta { padding: 30px 18px 24px; }
+  .carta-saludo { font-size: 1.6rem; }
+  .carta-texto { font-size: 1rem; line-height: 1.7; }
+  .carta-firma { font-size: 1.5rem; }
+  .carta-fecha { font-size: 0.85rem; }
+
+  .karaoke-prompt p { font-size: 2rem; }
+  .btn-flor { padding: 12px 28px; font-size: 0.95rem; }
+}
 </style>
 </head>
 <body>
