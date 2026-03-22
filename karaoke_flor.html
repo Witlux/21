@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌻 Catorce — Sebastián Romero</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background:#020818;
+    font-family:'Quicksand',sans-serif;
+    overflow:hidden; height:100vh; width:100vw;
+  }
+
+  #stars-canvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; }
+
+  .nebula { position:fixed; border-radius:50%; filter:blur(80px); opacity:.15; z-index:1; }
+  .nebula-1 { width:600px; height:400px; background:#3b1f7a; top:-100px; left:-100px; }
+  .nebula-2 { width:500px; height:500px; background:#1a3a6e; bottom:-100px; right:-100px; }
+  .nebula-3 { width:300px; height:300px; background:#6a0e4a; top:30%; left:40%; }
+
+  .moon {
+    position:fixed; top:30px; right:60px;
+    width:60px; height:60px;
+    background:radial-gradient(circle at 35% 35%, #fffde7, #ffd54f);
+    border-radius:50%;
+    box-shadow:0 0 30px 10px rgba(255,213,79,.3);
+    z-index:2; animation:moonGlow 4s ease-in-out infinite;
+  }
+  @keyframes moonGlow {
+    0%,100%{box-shadow:0 0 30px 10px rgba(255,213,79,.3)}
+    50%    {box-shadow:0 0 50px 18px rgba(255,213,79,.55)}
+  }
+
+  .fx-layer { position:fixed; inset:0; pointer-events:none; z-index:3; overflow:hidden; }
+
+  .heart {
+    position:absolute; bottom:-60px; font-size:1.4rem; opacity:0;
+    animation:floatHeart linear infinite;
+  }
+  @keyframes floatHeart {
+    0%  {transform:translateY(0) scale(.7) rotate(-10deg);opacity:0}
+    10% {opacity:.85}
+    80% {opacity:.6}
+    100%{transform:translateY(-110vh) scale(1.1) rotate(10deg);opacity:0}
+  }
+
+  .note {
+    position:absolute; bottom:-30px; font-size:1.3rem; opacity:0;
+    color:rgba(255,220,50,.7); animation:floatNote linear infinite;
+  }
+  @keyframes floatNote {
+    0%  {transform:translateY(0) rotate(0);opacity:0}
+    10% {opacity:.8}
+    90% {opacity:.4}
+    100%{transform:translateY(-110vh) rotate(360deg);opacity:0}
+  }
+
+  /* ---- layout ---- */
+  .scene {
+    position:fixed; inset:0;
+    display:grid;
+    grid-template-rows:1fr 190px 1fr;
+    align-items:center; justify-items:center;
+    z-index:10;
+  }
+
+  /* ---- letras arriba ---- */
+  .lyric-top {
+    width:100%; display:flex; flex-direction:column;
+    align-items:center; justify-content:flex-end;
+    padding-bottom:14px; gap:8px;
+  }
+
+  .song-title {
+    font-family:'Pacifico',cursive; font-size:1rem; color:#ffd54f;
+    letter-spacing:3px; text-shadow:0 0 18px rgba(255,213,79,.8);
+    animation:titlePulse 3s ease-in-out infinite; margin-bottom:4px;
+  }
+  @keyframes titlePulse{0%,100%{opacity:.75}50%{opacity:1}}
+
+  .lyric-prev {
+    font-size:1.15rem; font-weight:700;
+    color:rgba(255,255,255,.22); text-align:center;
+    padding:0 20px; min-height:1.6rem; white-space:nowrap;
+  }
+
+  .lyric-active-wrap { position:relative; text-align:center; }
+  .lyric-active-base {
+    font-size:2rem; font-weight:700;
+    color:rgba(255,255,255,.18); white-space:nowrap; padding:0 24px;
+  }
+  .lyric-active-hl {
+    position:absolute; top:0; left:0;
+    font-size:2rem; font-weight:700; color:#ffd54f;
+    text-shadow:0 0 18px rgba(255,220,50,.85),0 0 40px rgba(255,220,50,.4);
+    white-space:nowrap; overflow:hidden; width:0; padding:0 24px; transition:none;
+  }
+
+  /* ---- flor ---- */
+  .flower-wrap {
+    position:relative; width:180px; height:180px;
+    animation:floatFlower 3s ease-in-out infinite;
+  }
+  @keyframes floatFlower{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .flower-wrap svg { width:100%; height:100%; filter:drop-shadow(0 0 22px rgba(255,220,50,.65)); }
+  .petals-group{transform-origin:100px 100px;animation:rotatePetals 14s linear infinite}
+  @keyframes rotatePetals{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .flower-center{animation:pulseCenter 2s ease-in-out infinite;transform-origin:100px 100px}
+  @keyframes pulseCenter{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+  .sparkle{position:absolute;width:6px;height:6px;background:#ffe566;border-radius:50%;animation:sparkleFly 2.2s ease-in-out infinite}
+  .sparkle:nth-child(1){top:8px;left:50%;animation-delay:0s}
+  .sparkle:nth-child(2){top:50%;right:4px;animation-delay:.5s}
+  .sparkle:nth-child(3){bottom:8px;left:30%;animation-delay:1s}
+  .sparkle:nth-child(4){top:30%;left:4px;animation-delay:1.5s}
+  @keyframes sparkleFly{0%{opacity:0;transform:scale(0)}50%{opacity:1;transform:scale(1.6)}100%{opacity:0;transform:scale(0) translateY(-18px)}}
+
+  /* ---- abajo ---- */
+  .bottom-zone {
+    width:100%; display:flex; flex-direction:column;
+    align-items:center; justify-content:flex-start;
+    padding-top:14px; gap:14px;
+  }
+  .lyric-next {
+    font-size:1.05rem; font-weight:700;
+    color:rgba(255,255,255,.15); text-align:center;
+    padding:0 20px; min-height:1.5rem; white-space:nowrap;
+  }
+  .progress-bar-wrap {
+    width:480px; max-width:88vw; height:4px;
+    background:rgba(255,255,255,.1); border-radius:99px; overflow:hidden;
+  }
+  .progress-bar-fill {
+    height:100%;
+    background:linear-gradient(90deg,#ff8f00,#ffd54f,#fffde7);
+    width:0%; border-radius:99px;
+    box-shadow:0 0 8px rgba(255,213,79,.8); transition:width .3s linear;
+  }
+  .controls{display:flex;gap:14px}
+  .btn{
+    padding:10px 30px;border:none;border-radius:50px;cursor:pointer;
+    font-family:'Quicksand',sans-serif;font-weight:700;font-size:.95rem;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .btn:active{transform:scale(.96)}
+  .btn-play{
+    background:linear-gradient(135deg,#ffd54f,#ff8f00);color:#1a0a00;
+    box-shadow:0 4px 20px rgba(255,160,0,.4);
+  }
+  .btn-play:hover{box-shadow:0 6px 28px rgba(255,160,0,.65);transform:translateY(-2px)}
+  .btn-reset{
+    background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);
+    border:1px solid rgba(255,255,255,.15);
+  }
+  .btn-reset:hover{background:rgba(255,255,255,.15)}
+</style>
+</head>
+<body>
+
+<!-- AUDIO -->
+<audio id="cancion" src="MP3Now.com_YouTube_Catorce_Media_qqZGQPukZ-0_009_128k.mp3" preload="auto"></audio>
+
+<canvas id="stars-canvas"></canvas>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+<div class="moon"></div>
+
+<div class="fx-layer" id="hearts"></div>
+<div class="fx-layer" id="notes"></div>
+
+<div class="scene">
+
+  <!-- LETRAS ARRIBA -->
+  <div class="lyric-top">
+    <div class="song-title">♥ Catorce — Sebastián Romero ♥</div>
+    <div class="lyric-prev" id="lyric-prev"></div>
+    <div class="lyric-active-wrap">
+      <div class="lyric-active-base" id="lyric-base"></div>
+      <div class="lyric-active-hl"   id="lyric-hl"></div>
+    </div>
+  </div>
+
+  <!-- FLOR CENTRAL -->
+  <div class="flower-wrap">
+    <span class="sparkle"></span><span class="sparkle"></span>
+    <span class="sparkle"></span><span class="sparkle"></span>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="petalGrad" cx="50%" cy="30%" r="70%">
+          <stop offset="0%"   stop-color="#fffde7"/>
+          <stop offset="60%"  stop-color="#ffd54f"/>
+          <stop offset="100%" stop-color="#f9a825"/>
+        </radialGradient>
+        <radialGradient id="centerGrad" cx="40%" cy="35%" r="70%">
+          <stop offset="0%"   stop-color="#795548"/>
+          <stop offset="100%" stop-color="#3e2723"/>
+        </radialGradient>
+        <radialGradient id="innerGrad" cx="40%" cy="35%" r="70%">
+          <stop offset="0%"   stop-color="#ffcc02"/>
+          <stop offset="100%" stop-color="#e65100"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="80"  cy="165" rx="12" ry="6" fill="#388e3c" opacity=".7" transform="rotate(-30 80 165)"/>
+      <ellipse cx="120" cy="165" rx="12" ry="6" fill="#388e3c" opacity=".7" transform="rotate(30 120 165)"/>
+      <g class="petals-group">
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(45 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(90 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(135 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(180 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(225 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(270 100 100)"/>
+        <ellipse cx="100" cy="58" rx="16" ry="32" fill="url(#petalGrad)" opacity=".95" transform="rotate(315 100 100)"/>
+      </g>
+      <g class="flower-center">
+        <circle cx="100" cy="100" r="26"  fill="url(#centerGrad)"/>
+        <circle cx="93"  cy="93"  r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="100" cy="89"  r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="107" cy="93"  r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="93"  cy="107" r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="100" cy="111" r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="107" cy="107" r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="100" cy="100" r="2.5" fill="url(#innerGrad)" opacity=".9"/>
+        <circle cx="92"  cy="91"  r="5"   fill="rgba(255,255,255,.18)"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- ABAJO -->
+  <div class="bottom-zone">
+    <div class="lyric-next" id="lyric-next"></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress"></div>
+    </div>
+    <div class="controls">
+      <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ Iniciar</button>
+      <button class="btn btn-reset"             onclick="resetKaraoke()">↺ Reiniciar</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ===== ESTRELLAS ===== */
+const canvas=document.getElementById('stars-canvas');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+const stars=[];
+for(let i=0;i<280;i++) stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*1.8+.3,speed:Math.random()*.008+.003,off:Math.random()*Math.PI*2});
+for(let i=0;i<20;i++)  stars.push({x:Math.random()*canvas.width,y:Math.random()*canvas.height,r:Math.random()*2.5+1.5,speed:Math.random()*.005+.002,off:Math.random()*Math.PI*2,bright:true});
+let st=0;
+(function drawStars(){
+  ctx.clearRect(0,0,canvas.width,canvas.height); st+=.015;
+  stars.forEach(s=>{
+    const a=.4+.6*(.5+.5*Math.sin(st*s.speed*60+s.off));
+    ctx.beginPath();
+    if(s.bright){
+      const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*4);
+      g.addColorStop(0,`rgba(255,253,200,${a*.6})`); g.addColorStop(1,'rgba(255,253,200,0)');
+      ctx.arc(s.x,s.y,s.r*4,0,Math.PI*2); ctx.fillStyle=g;
+    } else {
+      ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle=`rgba(255,253,220,${a})`;
+    }
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+})();
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
+
+/* ===== CORAZONES ===== */
+const hColors=['#ff6b9d','#ff4d79','#ff8fab','#ffb3c6','#ff1a5e','#ff69b4','#ff85a1'];
+const heartsEl=document.getElementById('hearts');
+function spawnHeart(){
+  const h=document.createElement('div'); h.className='heart'; h.textContent='♥';
+  h.style.left=(Math.random()*94)+'vw';
+  h.style.color=hColors[Math.floor(Math.random()*hColors.length)];
+  const dur=(5+Math.random()*8).toFixed(1)+'s', del=(Math.random()*2).toFixed(1)+'s';
+  h.style.fontSize=(1+Math.random()*1.4).toFixed(1)+'rem';
+  h.style.animationDuration=dur; h.style.animationDelay=del;
+  heartsEl.appendChild(h);
+  setTimeout(()=>h.remove(),(parseFloat(dur)+parseFloat(del))*1000+600);
+}
+setInterval(spawnHeart,600);
+
+/* ===== NOTAS ===== */
+const noteSyms=['♩','♪','♫','♬'];
+const notesEl=document.getElementById('notes');
+function spawnNote(){
+  const n=document.createElement('div'); n.className='note';
+  n.textContent=noteSyms[Math.floor(Math.random()*noteSyms.length)];
+  n.style.left=(Math.random()*94)+'vw';
+  const dur=(6+Math.random()*7).toFixed(1)+'s', del=(Math.random()*3).toFixed(1)+'s';
+  n.style.fontSize=(.9+Math.random()*.9).toFixed(1)+'rem';
+  n.style.animationDuration=dur; n.style.animationDelay=del;
+  notesEl.appendChild(n);
+  setTimeout(()=>n.remove(),(parseFloat(dur)+parseFloat(del))*1000+600);
+}
+setInterval(spawnNote,900);
+
+/* ===== KARAOKE — Catorce (Sebastián Romero) ===== */
+/* delay = pausa ANTES de mostrar la línea | duration = cuánto dura visible */
+const lyrics=[
+  {text:"Eres lo primero en lo que pienso en las mañanas", delay:39000, duration:2000},
+  {text:"Eres con quien quiero despertar entre las sábanas", delay:0,     duration:5000},
+  {text:"Eres mi deseo de 11:11",                       delay:0,     duration:4000},
+  {text:"Eres con quien quiero estar febrero catorce",      delay:1000,  duration:4000},
+  {text:"Tú...",                                            delay:0,     duration:5000},
+  {text:"Lo intentamos si tú quieres",                     delay:4000,  duration:6000},
+  {text:"Puedo ser yo si te conviene",                      delay:3000,  duration:3000},
+  {text:"Yo ya decidí, ¿y tú?",                            delay:0,     duration:6000},
+  {text:"Lo intentamos si tú quieres",                     delay:1000,  duration:4000},
+  {text:"Puedo ser yo si te conviene",                      delay:0,     duration:3000},
+  {text:"Yo ya decidí, ¿y tú?",                            delay:2000,  duration:3000},
+  {text:"Eres mis canciones preferidas",                   delay:1000,  duration:4000},
+  {text:"Tienes que ser tú, solo tú",                      delay:1000,  duration:15000},
+  {text:"Eres lo mejor que podría pasarle a mi vida",      delay:13000, duration:4000},
+  {text:"pasarle a mi vida",                               delay:1000,  duration:4000},
+  {text:"Perfecta melodía...",                             delay:1000,  duration:3000},
+  {text:"Tú...",                                           delay:0,     duration:2000},
+  {text:"Tú...",                                           delay:1000,  duration:2000},
+  {text:"Lo intentamos si tú quieres",                     delay:0,     duration:4000},
+  {text:"Puedo ser yo si te conviene",                     delay:6000,  duration:6000},
+  {text:"Yo ya decidí, ¿y tú?",                           delay:1000,  duration:4000},
+  {text:"Lo intentamos si tú quieres",                     delay:1000,  duration:5000},
+  {text:"Puedo ser yo si te conviene",                     delay:1000,  duration:4000},
+  {text:"Yo ya decidí, ¿y tú? ♥",                         delay:1000,  duration:2000},
+  {text:"¿y tú? ♥",                                        delay:2000,  duration:4000},
+];
+
+const elPrev=document.getElementById('lyric-prev');
+const elBase=document.getElementById('lyric-base');
+const elHl  =document.getElementById('lyric-hl');
+const elNext=document.getElementById('lyric-next');
+const elProg=document.getElementById('progress');
+const elBtn =document.getElementById('playBtn');
+
+let cur=-1, playing=false, lTimeout=null, rafId=null;
+
+function showLine(idx){
+  if(idx>=lyrics.length){
+    playing=false; elBtn.textContent='▶ Iniciar';
+    elProg.style.width='100%';
+    elPrev.textContent=lyrics[lyrics.length-1].text;
+    elBase.textContent=elHl.textContent=elNext.textContent='';
+    return;
+  }
+  cur=idx;
+
+  const delay=lyrics[idx].delay||0;
+  const dur=lyrics[idx].duration;
+
+  /* durante la pausa limpiar la línea activa */
+  if(delay>0){
+    elBase.textContent='';
+    elHl.textContent='';
+    elHl.style.transition='none'; elHl.style.width='0px';
+    /* mostrar siguiente como preview tenue durante la pausa */
+    elNext.textContent=lyrics[idx].text;
+  }
+
+  lTimeout=setTimeout(()=>{
+    if(!playing) return;
+
+    elPrev.textContent=idx>0?lyrics[idx-1].text:'';
+    elBase.textContent=lyrics[idx].text;
+    elHl.textContent  =lyrics[idx].text;
+    elNext.textContent=idx+1<lyrics.length?lyrics[idx+1].text:'';
+
+    elHl.style.transition='none'; elHl.style.width='0px';
+
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      elHl.style.transition=`width ${dur}ms linear`;
+      elHl.style.width=elBase.offsetWidth+'px';
+    }));
+
+    const s0=(idx/lyrics.length)*100, s1=((idx+1)/lyrics.length)*100, t0=performance.now();
+    if(rafId) cancelAnimationFrame(rafId);
+    (function animProg(now){
+      const f=Math.min((now-t0)/dur,1);
+      elProg.style.width=(s0+(s1-s0)*f)+'%';
+      if(f<1&&playing) rafId=requestAnimationFrame(animProg);
+    })(t0);
+
+    lTimeout=setTimeout(()=>{if(playing) showLine(idx+1);},dur);
+  }, delay);
+}
+
+function togglePlay(){
+  const audio=document.getElementById('cancion');
+  if(playing){
+    playing=false; clearTimeout(lTimeout); if(rafId) cancelAnimationFrame(rafId);
+    elBtn.textContent='▶ Continuar';
+    audio.pause();
+  } else {
+    playing=true; elBtn.textContent='⏸ Pausa';
+    audio.play();
+    showLine(cur===-1||cur>=lyrics.length?0:cur);
+  }
+}
+
+function resetKaraoke(){
+  const audio=document.getElementById('cancion');
+  playing=false; clearTimeout(lTimeout); if(rafId) cancelAnimationFrame(rafId);
+  cur=-1; elBtn.textContent='▶ Iniciar';
+  elPrev.textContent=elBase.textContent=elNext.textContent='';
+  elHl.style.transition='none'; elHl.style.width='0'; elHl.textContent='';
+  elProg.style.width='0%';
+  audio.pause();
+  audio.currentTime=0;
+}
+</script>
+</body>
+</html>
