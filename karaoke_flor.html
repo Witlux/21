@@ -155,6 +155,33 @@
     border:1px solid rgba(255,255,255,.15);
   }
   .btn-reset:hover{background:rgba(255,255,255,.15)}
+
+  /* ===== RESPONSIVE MÓVIL ===== */
+  @media (max-width: 600px) {
+    .scene {
+      grid-template-rows: 1fr 130px 1fr;
+    }
+    .song-title { font-size: 0.8rem; letter-spacing: 1px; }
+
+    .lyric-prev { font-size: 0.85rem; white-space: normal; text-align: center; }
+    .lyric-next { font-size: 0.8rem;  white-space: normal; text-align: center; }
+
+    .lyric-active-base,
+    .lyric-active-hl {
+      font-size: 1.25rem;
+      white-space: normal;
+      word-break: break-word;
+      padding: 0 12px;
+    }
+
+    .flower-wrap { width: 120px; height: 120px; }
+
+    .progress-bar-wrap { width: 90vw; }
+
+    .btn { padding: 8px 20px; font-size: 0.85rem; }
+
+    .moon { width: 40px; height: 40px; top: 16px; right: 16px; }
+  }
 </style>
 </head>
 <body>
